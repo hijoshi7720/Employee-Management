@@ -1,0 +1,30 @@
+﻿@model HomeDetailsViewModel
+
+@{    
+    ViewBag.Title= "Employee Details";
+    var photoPath = "~/Images/" + (Model.Employee.PhotoPath??"employeeimage.jpg");
+}
+
+    <div class="row justify-content-center m-3">
+        <div class=" card">
+            <div class="card-header"> @Model.Employee.Name</div>
+            
+            <div class="card-body text-center">
+                <img class="card-img-top imageThumbnail" src=@photoPath height="500" width="100" asp-append-version="true"/>
+<h4>@Model.Employee.Name</h4>              
+                <h4>@Model.Employee.Department</h4>
+<h4>@Model.Employee.Email</h4>
+               
+            </div>
+
+            <div class="card-footer text-center">
+                <a asp-controller="home" asp-action="index" class="btn btn-primary">Back</a>             
+                <a href="#" class="btn-primary">Edit</a>
+                <a href="#" class="btn-danger">Delete</a>
+            </div>
+        </div>
+
+    </div>
+
+   
+
