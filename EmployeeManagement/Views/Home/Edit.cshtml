@@ -1,0 +1,136 @@
+﻿@model EmployeeEditViewModel
+
+@{
+    ViewBag.Title = "Edit Employee";
+     var photoPath = "~/Images/" + (Model.ExistingPhotoPath??"employeeimage.jpg");
+}
+
+<div class="Form1">
+    <form enctype="multipart/form-data" asp-controller="home" asp-Action="Edit" method="post" class="mt-3 ml-5 mr-5">
+        <input hidden asp-for="Id" />
+        <input hidden asp-for="ExistingPhotoPath" />
+        <div>
+            <label asp-for="Name"></label>
+            <div>
+                <input asp-for="Name" type="text" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div>
+            <label asp-for="Email"></label>
+
+            <div>
+                <input asp-for="Email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div>
+            <label asp-for="Department"></label>
+            <div>
+                <select asp-for="Department" asp-items="Html.GetEnumSelectList<Dept>()">
+                    <option value="">Please Select</option>
+                </select>
+            </div>
+            <span asp-validation-for="Department" class="text-danger"></span>
+        </div>
+
+        <div>
+            <label class="label" asp-for="Photo"></label>
+
+            <div class="custom-file">
+                <input multiple asp-for="Photo" class="form-control custom-file-input" />
+                <label class="custom-file-label" asp-for="Photo">Click here to change photo</label>
+            </div>
+        </div>
+
+        <div>   <img src=@photoPath class="imageThumbnail mt-2" asp-append-version="true" /></div>
+
+        <div asp-validation-summary="All" class="text-danger"></div>
+
+        <div>  <button id="" class="btn btn-primary" type="submit" style="float:left;margin-right:10px;width:auto">Update</button></div>
+        <div>  <a asp-controller="home" asp-action="index" style="width:auto" class="btn btn-primary " id="">Cancel</a></div>
+
+        @*<div class="form-div">
+            <div class="left">
+             Total Employees =@_empRepository.GetEmployees().Count()
+            </div>
+        </div>*@
+
+        @section Scripts{
+            <script>
+                $(document).ready(function () {
+                    $('.custom-file-input').on("change", function () {
+                        //var fileLabel = $(this).next('.custom-file-label');
+                        //var files = $(this)[0].files;
+                        //if (files.length > 1) {
+                        //    fileLabel.html(files.length + ' files selected');
+                        //}
+                        //else if (files.length == 1) {
+                        //    fileLabel.text(files[0].name);
+                        //}
+
+                        var fileName = $(this).val().split("\\").pop();
+                        $(this).next('.custom-file-label').html(fileName);
+
+                        console.log($(this));
+
+                    })
+                });
+            </script>
+        }
+
+    </form>
+</div>
+<style>
+
+
+
+    input[type=text], input[type=file] {
+        width: 100%;
+        background: #ede9e9;
+    }
+
+
+    .label {
+        width: 100%;
+        float: left;
+    }
+
+    .right {
+        width: 50%;
+        float: left;
+    }
+
+    .form-div {
+        width: 100%;
+    }
+
+    button#submit ,#cancel {
+        background-color: darkgreen;
+        border-radius: 10%;
+        border-color: darkgreen;
+        color: white;
+        padding: 1% 3% 1% 3%;
+    }
+    
+
+    input {
+        width: 81%;
+        border-radius: 4%;
+        /* border: bisque; */
+        padding: 1%;
+    }
+
+    .form-div {
+        width: 100%;
+        margin: 2% 0% 0% 0%;
+    }
+
+    @@media screen and (max-width: 992px) {
+        #Name, #Email {
+            width: 70%;
+        }
+    }
+</style>

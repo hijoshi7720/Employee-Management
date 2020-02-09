@@ -47,40 +47,11 @@ namespace EmployeeManagement.Controllers
 
         [HttpPost]
         public IActionResult Create(EmployeeCreateViewModel model)
-        {
-            //if (ModelState.IsValid)
-            //    {
-            //        Employee newEmployee = employeeRepository.Add(employee);
-            //        return RedirectToAction("details", new { id = newEmployee.Id });
-            //    }
-            //    else
-            //    {
-            //        return View();
-            //    }
-            //if (ModelState.IsValid)
-            //{
-
-            //    Employee newEmployee = employeeRepository.Add(employee);                
-            //}
-
+        {            
             if(ModelState.IsValid)
             {
-                string uniqueFileName = null;
-
-                if (model.Photos != null && model.Photos.Count > 0)
-                {
-                    foreach (IFormFile photo in model.Photos)
-                    {
-
-
-                        string uploadFolder = Path.Combine(hostingEnvironment.WebRootPath, "images");
-                        uniqueFileName = Guid.NewGuid().ToString() + "_" + photo.FileName.Split('\\').Last();
-
-                        string filePath = Path.Combine(uploadFolder, uniqueFileName);
-
-                       photo.CopyTo(new FileStream(filePath, FileMode.Create));
-                    }
-                }
+                string uniqueFileName = ProcessUploadedFile(model);
+               
                 Employee employee = new Employee { Name = model.Name, Email = model.Email, Department = model.Department, PhotoPath = uniqueFileName };
 
                 employeeRepository.Add(employee);
@@ -90,19 +61,102 @@ namespace EmployeeManagement.Controllers
             return View();
         }
 
-        public ViewResult ViewBag1()
+        [HttpGet]
+        public ViewResult Edit(int id)
         {
-            Employee model = employeeRepository.GetEmployee(2);
-            ViewBag.Employee = model;
-            ViewBag.PageTitle = "Employee Details";
-            return View(model);
+            Employee employee = employeeRepository.GetEmployee(id);
+
+            EmployeeEditViewModel employeeEditViewModel = new EmployeeEditViewModel()
+            {
+                Id = employee.Id,
+                Name = employee.Name,
+                Email = employee.Email,
+                Department = employee.Department,
+                ExistingPhotoPath = employee.PhotoPath
+            };
+
+            return View(employeeEditViewModel);
         }
 
-        public ViewResult StronglyTyped()
+
+        [HttpPost]
+        public IActionResult Edit(EmployeeEditViewModel model)
         {
-            Employee model = employeeRepository.GetEmployee(2);
-            ViewBag.PageTitle = "Strongly Typed Employee Details";
-            return View(model);
+            if (ModelState.IsValid)
+            {
+                Employee employee = employeeRepository.GetEmployee(model.Id);
+                employee.Name = model.Name;
+                employee.Email = model.Email;
+                employee.Department = model.Department;
+
+                if (model.Photo != null)
+                {
+                    if (model.ExistingPhotoPath != null)
+                    {
+                       string filePath= Path.Combine(hostingEnvironment.WebRootPath, "images", model.ExistingPhotoPath);
+
+                        System.IO.File.Delete(filePath);
+                    }
+                    employee.PhotoPath = ProcessUploadedFile(model);
+                }
+
+                employeeRepository.Update(employee);
+                return RedirectToAction("details", new { id = employee.Id });
+            }
+
+            return View();
         }
+
+        
+        public ActionResult Delete(int id)
+        {
+            Employee employee = employeeRepository.GetEmployee(id);
+
+            if (employee.PhotoPath != null)
+            {
+                string filePath = Path.Combine(hostingEnvironment.WebRootPath, "images", employee.PhotoPath);
+
+                System.IO.File.Delete(filePath);               
+            }
+            employeeRepository.Detele(id);
+
+            return RedirectToAction("index");
+        }
+
+
+        private string ProcessUploadedFile(EmployeeCreateViewModel model)
+        {
+            string uniqueFileName = null;
+
+            if (model.Photo != null )
+            {               
+                    string uploadFolder = Path.Combine(hostingEnvironment.WebRootPath, "images");
+                    uniqueFileName = Guid.NewGuid().ToString() + "_" + model.Photo.FileName.Split('\\').Last();
+
+                    string filePath = Path.Combine(uploadFolder, uniqueFileName);
+                using(var fileStream=new FileStream(filePath, FileMode.Create))
+                {
+                    model.Photo.CopyTo(fileStream);
+                }                              
+            }
+
+            return uniqueFileName;
+        }
+
+
+        //public ViewResult ViewBag1()
+        //{
+        //    Employee model = employeeRepository.GetEmployee(2);
+        //    ViewBag.Employee = model;
+        //    ViewBag.PageTitle = "Employee Details";
+        //    return View(model);
+        //}
+
+        //public ViewResult StronglyTyped()
+        //{
+        //    Employee model = employeeRepository.GetEmployee(2);
+        //    ViewBag.PageTitle = "Strongly Typed Employee Details";
+        //    return View(model);
+        //}
     }
 }
